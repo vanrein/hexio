@@ -29,7 +29,7 @@ int getbyte (char *output) {
 	*output = 0;
 
 	if (status == error) {
-		return;
+		return 0;
 	}
 
 	do {

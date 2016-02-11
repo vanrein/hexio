@@ -75,7 +75,7 @@ while not eof ():
 
 	while nesting != [] and ofs >= nesting [-1]:
 		if ofs > nesting [-1]:
-			print 'READ OFFSET %d EXCEEDS ENCAPSULATION %d (RETURNING)' % (ofs, nesting [1])
+			print 'READ OFFSET %d EXCEEDS ENCAPSULATION %d (RETURNING)' % (ofs, nesting [-1])
 		ofs = nesting.pop ()
 
 	tag = read1 ()
@@ -116,17 +116,33 @@ while not eof ():
 
 	if tag_pc == 0 and leng > 0:
 		print '  ' * ( len (nesting) + 1 ),
-		cstr = ' == "'
+		cstr = '"'
+		ival = 0
+		ostr = ''
+		oval = None
 		while leng > 0:
 			ch = read1 ()
 			print '%02x' % ch,
-			if 32 <= ch <= 127:
+			if 32 <= ch < 127:
 				cstr = cstr + chr (ch)
 			else:
 				cstr = cstr + '.'
+			ival = (ival << 8) | ch
+			if oval is None:
+				ostr = str (ch / 40) + '.' + str (ch % 40)
+				oval = 0
+			else:
+				oval = (oval << 7) | (ch & 0x7f)
+				if ch & 0x80 == 0:
+					ostr = ostr + '.' + str (oval)
+					oval = 0
 			leng = leng - 1
 		cstr = cstr + '"'
-		print cstr
+		if tag == 0x06:
+			cstr = ostr
+		elif tag == 0x02:
+			cstr = str (ival)
+		print '==', cstr
 
 	if tag_pc != 0:
 		# print 'Now at', ofs, 'adding', leng, 'pushing', ofs + leng

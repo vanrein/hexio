@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/select.h>
@@ -85,4 +86,5 @@ int main (int argc, char *argv []) {
 		}
 	}
 	SCardReleaseContext (ctx);
+	return 0;
 }

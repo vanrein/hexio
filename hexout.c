@@ -26,7 +26,9 @@ struct itimerval stopival = { { 0, 0 } , { 0, 0 } };
 
 int main (int argc, char *argv []) {
 	unsigned char buf [BYTES_PER_LINE];
+/*
 	unsigned long timer;
+*/
 	size_t len;
 	size_t offset = 0;
 	if (signal (SIGALRM, tick) == SIG_ERR) {
@@ -54,7 +56,7 @@ int main (int argc, char *argv []) {
 		if (len2 >= 0) {
 			len += len2;
 		}
-		printf ("%08x", offset);
+		printf ("%08lx", offset);
 		offset += len;
 		for (i=0; i<len; i++) {
 			printf (" %02x", buf [i]);

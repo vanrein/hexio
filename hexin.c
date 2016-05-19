@@ -7,7 +7,7 @@
 enum status { normal, endline, error, endfile };
 enum status status = normal;
 
-void ch2hex (char *output, int ch) {
+void ch2hex (unsigned char *output, int ch) {
 	if ((ch >= '0') && (ch <= '9')) {
 		*output <<= 4;
 		*output += ch - '0';
@@ -23,7 +23,7 @@ void ch2hex (char *output, int ch) {
 	}
 }
 
-int getbyte (char *output) {
+int getbyte (unsigned char *output) {
 	int ch;
 
 	*output = 0;
@@ -63,7 +63,7 @@ int main (int argc, char *argv []) {
 			status = normal;
 		}
 		usleep (1000000L); // Yield to others -- better prompt printing
-		fprintf (stderr, "%08x>", offset);
+		fprintf (stderr, "%08lx>", offset);
 		fflush (stderr);
 		len = 0;
 		while ((len < BYTES_PER_LINE) && (status == normal)) {
@@ -81,4 +81,5 @@ int main (int argc, char *argv []) {
 			status = normal;
 		}
 	}
+	return 0;
 }

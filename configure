@@ -1,0 +1,2 @@
+#!/bin/sh
+echo 'Configuration is not needed, just run "make all"'

@@ -3,7 +3,8 @@
 import sys
 
 if len (sys.argv) != 2:
-	print 'Usage: ' + sys.argv [0] + 'file.der'
+	print 'Usage:  ' + sys.argv [0] + 'file.der'
+	print 'Output: MEANING: TAG ###CONTLEN @TAGOFS ^NESTING, CLASS, PRIMCONSTR'
 	sys.exit (1)
 
 der = open (sys.argv [1], 'r').read (65537)
@@ -117,7 +118,7 @@ while not eof ():
 	if tag_pc == 0 and leng > 0:
 		print '  ' * ( len (nesting) + 1 ),
 		cstr = '"'
-		ival = 0
+		ival = None
 		ostr = ''
 		oval = None
 		while leng > 0:
@@ -127,7 +128,10 @@ while not eof ():
 				cstr = cstr + chr (ch)
 			else:
 				cstr = cstr + '.'
-			ival = (ival << 8) | ch
+			if ival is None:
+				ival = -1 if ch >= 128 else 0
+			else:
+				ival = (ival << 8) | ch
 			if oval is None:
 				ostr = str (ch / 40) + '.' + str (ch % 40)
 				oval = 0

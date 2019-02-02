@@ -31,6 +31,9 @@ int main (int argc, char *argv []) {
 */
 	size_t len;
 	size_t offset = 0;
+	int prompt;
+	char comma [80];
+
 	if (signal (SIGALRM, tick) == SIG_ERR) {
 		perror ("Failed to install interval handler");
 		exit (1);
@@ -43,6 +46,7 @@ int main (int argc, char *argv []) {
 			len = read (0, buf, BYTES_PER_LINE),
 			(len > 0) || ( errno == SIGALRM ) ) {
 */
+	prompt = isatty (1);
 	while (len = read (0, buf, 1), len > 0) {
 		size_t i;
 		int len2;
@@ -56,10 +60,16 @@ int main (int argc, char *argv []) {
 		if (len2 >= 0) {
 			len += len2;
 		}
-		printf ("%08lx", offset);
+		if (prompt) {
+			snprintf (comma, sizeof(comma)-1, "%08lx", offset);
+		} else {
+			comma [0] = '\0';
+		}
 		offset += len;
 		for (i=0; i<len; i++) {
-			printf (" %02x", buf [i]);
+			printf ("%s%02x", comma, buf [i]);
+			comma [0] = ' ';
+			comma [1] = '\0';
 		}
 		printf ("\r\n");
 		fflush (stdout);

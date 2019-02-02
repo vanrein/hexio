@@ -57,14 +57,18 @@ int main (int argc, char *argv []) {
 	size_t len;
 	unsigned char buf [BYTES_PER_LINE];
 	char ch;
+	int prompt;
 
+	prompt = isatty (0);
 	while (status != endfile) {
 		if (status == endline) {
 			status = normal;
 		}
-		usleep (1000000L); // Yield to others -- better prompt printing
-		fprintf (stderr, "%08lx>", offset);
-		fflush (stderr);
+		if (prompt) {
+			usleep (1000000L); // Yield to others -- better prompt printing
+			fprintf (stderr, "%08lx>", offset);
+			fflush (stderr);
+		}
 		len = 0;
 		while ((len < BYTES_PER_LINE) && (status == normal)) {
 			if (getbyte (&buf [len])) {

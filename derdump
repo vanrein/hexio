@@ -1,29 +1,28 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 
-if len (sys.argv) != 2:
-	print 'Usage:  ' + sys.argv [0] + 'file.der'
-	print 'Output: MEANING: TAG ###CONTLEN @TAGOFS ^NESTING, CLASS, PRIMCONSTR'
+import optparse
+
+opts = optparse.OptionParser ()
+opts.add_option ('-c', '--colour', '--color',
+		action='store_true', default=False, dest='colour',
+		help='Print colourful output (loads Python module "colored", page with "less -R")')
+(options,args) = opts.parse_args ()
+
+if len (args) != 1:
+	print 'Usage:  ' + attr ('bold') + sys.argv [0] + '[--colour] file.der' + attr (0)
+	print 'Output: ' + nicemeaning ('MEANING') + ': ' + nicetag ('TAG') + ' ' + nicecontlen ('CONTLEN', 3) + ' ' + nicetagofs ('TAGOFS') + ' ' + nicenesting ('NESTING') + ', ' + niceclass ('CLASS') + ', ' + niceprimconstr ('PRIMCONSTR')
 	sys.exit (1)
 
-der = open (sys.argv [1], 'r').read (65537)
-ofs = 0
+if options.colour:
+	from colored import fg, bg, attr
+else:
+	def attr (_col):
+		return ''
+	fg = attr
+	bg = attr
 
-def eof ():
-	global ofs, der
-	return ofs >= len (der)
-
-def read1 ():
-	global ofs, der
-	if eof ():
-		print 'ATTEMPTED READ BEYOND EOF (RETURNING 0x00)'
-		return 0
-	else:
-		ofs = ofs + 1
-		return ord (der [ofs-1])
-
-nesting = []
 
 class2str = {
 	0: 'Universal',
@@ -72,6 +71,63 @@ universal2str = {
 	31: '*****'
 }
 
+
+def niceerror (s):
+	return bg ('yellow') + fg ('red') + s + attr (0)
+
+def nicemeaning (s):
+	return attr ('bold') + s + attr (0)
+
+def nicetag (ds):
+	if type (ds) == int:
+		ds = 'tag 0x%02x' % ds
+	return fg ('green') + ds + attr (0)
+
+def nicecontlen (ds, depth):
+	if type (ds) == int:
+		ds = str (ds)
+	return fg ('magenta') + '#' * depth + ds + attr (0)
+
+def nicetagofs (ds):
+	if type (ds) == int:
+		ds = str (ds)
+	return fg ('cyan') + '@' + ds + attr (0)
+
+def nicenesting (ad):
+	if type (ad) == type ([]):
+		ad = len (ad)
+	return fg ('light_blue') + '^' + str (ad) + attr (0)
+
+def niceclass (ds):
+	if type (ds) == int:
+		ds = class2str [ds]
+	return attr ('dim') + ds + attr (0)
+
+def niceprimconstr (ds):
+	if type (ds) == bool:
+		ds = int (ds)
+	if type (ds) == int:
+		ds = pc2str [ds]
+	return attr ('dim') + ds + attr (0)
+
+der = open (args [0], 'r').read (65537)
+ofs = 0
+
+def eof ():
+	global ofs, der
+	return ofs >= len (der)
+
+def read1 ():
+	global ofs, der
+	if eof ():
+		print 'ATTEMPTED READ BEYOND EOF (RETURNING 0x00)'
+		return 0
+	else:
+		ofs = ofs + 1
+		return ord (der [ofs-1])
+
+nesting = []
+
 while not eof ():
 
 	while nesting != [] and ofs >= nesting [-1]:
@@ -106,18 +162,18 @@ while not eof ():
 	else:
 		meaning = '[PRIVATE ' + str (tag_num) + ']'
 
-	print '%s%s: tag 0x%02x %s%d @%d ^%d, %s, %s' % (
+	print ('%s%s: %s %s %s %s, %s, %s' % (
 			'  ' * len (nesting),
-			meaning, tag,
-			'#' * lenlen, leng,
-			ofs - lenlen - 1,
-			len (nesting),
-			class2str [tag_class],
-			pc2str [tag_pc] )
+			nicemeaning (meaning), nicetag (tag),
+			nicecontlen (leng, lenlen),
+			nicetagofs (ofs - lenlen - 1),
+			nicenesting (nesting),
+			niceclass (tag_class),
+			niceprimconstr (tag_pc) ) )
 
 	if tag_pc == 0 and leng > 0:
 		print '  ' * ( len (nesting) + 1 ),
-		cstr = '"'
+		cstr = ''
 		ival = None
 		ostr = ''
 		oval = None
@@ -141,11 +197,12 @@ while not eof ():
 					ostr = ostr + '.' + str (oval)
 					oval = 0
 			leng = leng - 1
-		cstr = cstr + '"'
 		if tag == 0x06:
-			cstr = ostr
+			cstr = attr ('bold') + ostr + attr (0)
 		elif tag == 0x02:
-			cstr = str (ival)
+			cstr = attr ('bold') + str (ival) + attr (0)
+		else:
+			cstr = '"' + attr ('bold') + cstr + attr (0) + '"'
 		print '==', cstr
 
 	if tag_pc != 0:
@@ -154,6 +211,6 @@ while not eof ():
 
 while nesting != []:
 	if ofs != nesting [-1]:
-		print 'NESTING NOT ENDED CORRECTLY, OFFSET IS %d INSTEAD OF %d (CONTINUING)' % (ofs, nesting [-1])
+		print niceerror ('NESTING NOT ENDED CORRECTLY, OFFSET IS %d INSTEAD OF %d (CONTINUING)' % (ofs, nesting [-1]))
 	nesting.pop ()
 

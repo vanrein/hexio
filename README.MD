@@ -24,3 +24,7 @@ simplicity, they can be true life savers.
     full of errors; the utility will complain loudly, but continue instead
     of failing fatally; this makes it a very useful developer tool.
 
+    Use the option `--colour` to get output with helpful colouring; the
+    most important information will stand out in bold face.  You can pipe
+    it into `less -R` if you need a colour-friendly pager.
+

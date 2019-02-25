@@ -177,6 +177,8 @@ while not eof ():
 		ival = None
 		ostr = ''
 		oval = None
+		bseq = []
+		bval = -8
 		while leng > 0:
 			ch = read1 ()
 			print '%02x' % ch,
@@ -186,8 +188,7 @@ while not eof ():
 				cstr = cstr + '.'
 			if ival is None:
 				ival = -1 if ch >= 128 else 0
-			else:
-				ival = (ival << 8) | ch
+			ival = (ival << 8) | ch
 			if oval is None:
 				ostr = str (ch / 40) + '.' + str (ch % 40)
 				oval = 0
@@ -196,14 +197,32 @@ while not eof ():
 				if ch & 0x80 == 0:
 					ostr = ostr + '.' + str (oval)
 					oval = 0
+			for b in range (8):
+				if ((ch << b) & 0x80) == 0x80:
+					bseq.append (bval + b)
+			bval += 8
 			leng = leng - 1
-		if tag == 0x06:
+		if tag == 0x01:
+			cstr = attr ('bold') + ('TRUE' if ival != 0 else 'FALSE') + attr (0)
+		elif tag == 0x06:
 			cstr = attr ('bold') + ostr + attr (0)
-		elif tag == 0x02:
+		elif tag in [0x02,0x0a]:
 			cstr = attr ('bold') + str (ival) + attr (0)
+		elif tag == 0x03:
+			if len (bseq) <= 32:
+				cstr = '{' + ','.join (
+					[ attr ('bold') + str (b) + attr (0)
+					  for b in bseq
+					  if b >= 0
+					]) + '}'
+			else:
+				cstr = None
 		else:
 			cstr = '"' + attr ('bold') + cstr + attr (0) + '"'
-		print '==', cstr
+		if cstr is not None:
+			print '==', cstr
+		else:
+			print
 
 	if tag_pc != 0:
 		# print 'Now at', ofs, 'adding', leng, 'pushing', ofs + leng

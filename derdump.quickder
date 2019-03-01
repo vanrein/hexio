@@ -22,11 +22,6 @@ opts.add_option ('-a', '--asn1type', '--asn1', '--asn.1', '--ASN1', '--ASN.1',
 		help='Expect the given ASN.1 type; validate the syntax and use its symbols')
 (options,args) = opts.parse_args ()
 
-if len (args) != 1:
-	print 'Usage:  ' + attr ('bold') + sys.argv [0] + '[--colour] file.der' + attr (0)
-	print 'Output: ' + nicemeaning ('MEANING') + ': ' + nicetag ('TAG') + ' ' + nicecontlen ('CONTLEN', 3) + ' ' + nicetagofs ('TAGOFS') + ' ' + nicenesting ('NESTING') + ', ' + niceclass ('CLASS') + ', ' + niceprimconstr ('PRIMCONSTR')
-	sys.exit (1)
-
 if options.colour:
 	from colored import fg, bg, attr
 else:
@@ -34,6 +29,11 @@ else:
 		return ''
 	fg = attr
 	bg = attr
+
+if len (args) != 1:
+	print 'Usage:  ' + attr ('bold') + sys.argv [0] + '[--colour] file.der' + attr (0)
+	print 'Output: ' + nicemeaning ('MEANING') + ': ' + nicetag ('TAG') + ' ' + nicecontlen ('CONTLEN', 3) + ' ' + nicetagofs ('TAGOFS') + ' ' + nicenesting ('NESTING') + ', ' + niceclass ('CLASS') + ', ' + niceprimconstr ('PRIMCONSTR')
+	sys.exit (1)
 
 # Setup "qdmod" with a Quick DER module
 #

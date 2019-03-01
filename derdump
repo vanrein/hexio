@@ -10,11 +10,6 @@ opts.add_option ('-c', '--colour', '--color',
 		help='Print colourful output (loads Python module "colored", page with "less -R")')
 (options,args) = opts.parse_args ()
 
-if len (args) != 1:
-	print 'Usage:  ' + attr ('bold') + sys.argv [0] + '[--colour] file.der' + attr (0)
-	print 'Output: ' + nicemeaning ('MEANING') + ': ' + nicetag ('TAG') + ' ' + nicecontlen ('CONTLEN', 3) + ' ' + nicetagofs ('TAGOFS') + ' ' + nicenesting ('NESTING') + ', ' + niceclass ('CLASS') + ', ' + niceprimconstr ('PRIMCONSTR')
-	sys.exit (1)
-
 if options.colour:
 	from colored import fg, bg, attr
 else:
@@ -22,6 +17,11 @@ else:
 		return ''
 	fg = attr
 	bg = attr
+
+if len (args) != 1:
+	print 'Usage:  ' + attr ('bold') + sys.argv [0] + '[--colour] file.der' + attr (0)
+	print 'Output: ' + nicemeaning ('MEANING') + ': ' + nicetag ('TAG') + ' ' + nicecontlen ('CONTLEN', 3) + ' ' + nicetagofs ('TAGOFS') + ' ' + nicenesting ('NESTING') + ', ' + niceclass ('CLASS') + ', ' + niceprimconstr ('PRIMCONSTR')
+	sys.exit (1)
 
 
 class2str = {

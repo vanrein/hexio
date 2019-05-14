@@ -1,0 +1,2 @@
+pcscio.c
+	depends on libpcsclite-dev

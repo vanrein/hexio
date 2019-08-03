@@ -4,23 +4,28 @@ project ("hexio" C)
 
 include (FindPkgConfig)
 
-pkg_search_module (PCSCLITE REQUIRED libpcsclite libpcsclite-dev)
+pkg_search_module (PCSCLITE libpcsclite libpcsclite-dev)
 
-# message ("Found pcsclite, ${PCSCLITE_FOUND}")
-message ("Found pcsclite includes at ${PCSCLITE_INCLUDE_DIRS}")
-# message ("Found pcsclite libraries at ${PCSCLITE_LIBRARIES}")
-# message ("Found pcsclite library dirs at ${PCSCLITE_LIBRARY_DIRS}")
-
-include_directories (${PCSCLITE_INCLUDE_DIRS})
+if (PCSCLITE_FOUND)
+	# message ("Found pcsclite, ${PCSCLITE_FOUND}")
+	message ("Found pcsclite includes at ${PCSCLITE_INCLUDE_DIRS}")
+	# message ("Found pcsclite libraries at ${PCSCLITE_LIBRARIES}")
+	# message ("Found pcsclite library dirs at ${PCSCLITE_LIBRARY_DIRS}")
+	include_directories (${PCSCLITE_INCLUDE_DIRS})
+	set (PCSC_OPT_TARGET pcscio)
+else()
+	set (PCSC_OPT_TARGET)
+endif ()
 
 add_executable (hexin  hexin.c)
 add_executable (hexout hexout.c)
 add_executable (devio  devio.c)
-add_executable (pcscio pcscio.c)
+if (PCSCLITE_FOUND)
+	add_executable (pcscio pcscio.c)
+	target_link_libraries (pcscio ${PCSCLITE_LIBRARIES})
+endif ()
 
-target_link_libraries (pcscio ${PCSCLITE_LIBRARIES})
-
-install (TARGETS hexin hexout devio pcscio
+install (TARGETS hexin hexout devio ${PCSC_OPT_TARGET}
 	RUNTIME DESTINATION /usr/local/bin
 )
 install (PROGRAMS derdump
